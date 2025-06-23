@@ -15,11 +15,16 @@ public class GameController : MonoBehaviour
     public Text PlayingScoreText;
     public Text GameOverScoreText;
     public Text GameOverBestScoreText;
+    public Text PlayerHealthCounterText;    //Text Box for Number counter on play scene
 
     private int score;
     private int bestScore;
     private static float playingBackgroungMusicTime;
     private AudioSource playingBackgroungMusic;
+
+    //Lives Variables
+    private int lives;
+    private const int defaultLives = 3;
 
     public int Score
     {
@@ -66,6 +71,10 @@ public class GameController : MonoBehaviour
         PlayingUI.SetActive(true);
         GameOverUI.SetActive(false);
         PauseMenuUI.SetActive(false);
+
+        //Initialize lives
+        lives = defaultLives;
+        UpdateLivesUI();
     }
 
     void Start()
@@ -86,6 +95,34 @@ public class GameController : MonoBehaviour
     private void addScore()
     {
         Score++;
+    }
+
+    //Update lives for UI
+    private void UpdateLivesUI()
+    {
+        PlayerHealthCounterText.text = " " + lives;
+    }
+
+    //Losing life function
+    public void LoseLife()
+    {
+        if(lives > 0)
+        {
+            lives--;
+            UpdateLivesUI();
+
+            if(lives <= 0)
+            {
+                GameOver();
+            }
+        }
+    }
+
+    //Add extra lives possibly from store
+    public void AddExtraLives()
+    {
+        lives++;
+        UpdateLivesUI();
     }
 
     public void GameOver()
