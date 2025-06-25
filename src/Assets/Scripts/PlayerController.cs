@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float Force;
+    public bool mimicPower = false;
 
     private Rigidbody2D rb;
     private GameController gc;
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
         {
             Flap();
         }
+        
     }
 
     void OnTriggerEnter2D(Collider2D other)
