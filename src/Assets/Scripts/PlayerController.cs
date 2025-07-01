@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float Force;
-    public float speed = 5f;
 
     bool gravityFlip = false;
     public float movement = 1f; //Sets movement to the right
@@ -27,11 +26,12 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Z)) //Makes the player move left if they press "Z"
         {
-            movement = -1f;
+            movement -= 1f;
         }
-        else if (Input.GetKeyDown(KeyCode.X)) //Makes the player move right if they press "X"
+
+        if (Input.GetKeyDown(KeyCode.X)) //Makes the player move right if they press "X"
         {
-            movement = 1f;
+            movement += 1f;
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift)) //Flip gravity by pressing the "Shift" key
@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate() //
     {
-        rb.velocity = new Vector2(movement * speed, rb.velocity.y);
+        rb.velocity = new Vector2(movement, rb.velocity.y);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -55,7 +55,8 @@ public class PlayerController : MonoBehaviour
 
     public void Flap()
     {
-        rb.AddForce(Vector2.up * Force);
+        float direction = gravityFlip ? -1f : 1f;
+        rb.AddForce(Vector2.up * Force * direction);
     }
 
     public void Flip()
