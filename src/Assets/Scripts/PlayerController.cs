@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     public float Force;
     public GameObject player;
+    bool gravityFlip = false;
     //Set respawn position
     Vector2 startPos;
 
@@ -42,8 +43,10 @@ public class PlayerController : MonoBehaviour
 
     public void Flap()
     {
+        float direction = gravityFlip ? -1f : 1f;
         //rb.AddForce(Vector2.up * Force);  //Original jump/flap formula
-        rb.linearVelocity = Vector2.up * Force; //Should be more responsive than before
+        //rb.linearVelocity = Vector2.up * Force; //Should be more responsive than before
+        rb.velocity = new Vector2(rb.velocity.x, Force * direction);    //New formula to add direction
     }
 
     //Once player hits boundary the player is moved to the center of the screen
