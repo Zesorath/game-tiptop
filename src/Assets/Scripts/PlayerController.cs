@@ -7,8 +7,8 @@ public class PlayerController : MonoBehaviour
     public float Force;
     public GameObject player;
     bool gravityFlip = false;
-    //Set respawn position
-    Vector2 startPos;
+    Vector2 startPos;   //Set respawn position
+    bool waitingForInput = false;   //Bool for waiting after death
 
     private Rigidbody2D rb;
     private GameController gc;
@@ -18,15 +18,26 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
 
-        //Get start position of player
-        startPos = transform.position;
+        startPos = transform.position;  //Get start position of player
     }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) //Add Space function
+        if (waitingForInput)    //If true then game is paused till they press space or leftmouse button
         {
-            Flap();
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) //Add Space function
+            {
+                waitingForInput = false;
+                Time.timeScale = 1; //Unpause game
+                Flap();
+            }
+        }
+        else
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) //Add Space function
+            {
+                Flap();
+            }
         }
     }
 
@@ -37,7 +48,7 @@ public class PlayerController : MonoBehaviour
             //Activate Respawn and life counter goes down 1
             Respawn();
             gc.LoseLife();
-            //gc.GameOver();
+            
         }
     }
 
@@ -53,5 +64,7 @@ public class PlayerController : MonoBehaviour
     void Respawn()
     {
         transform.position = startPos;
+        Time.timeScale = 0; //Pause game after respawn
+        waitingForInput = true;
     }
 }
