@@ -27,12 +27,12 @@ public class ObstacleGenerator : MonoBehaviour
 
     private float topInterval
     {
-        get => (topWidth - Smooth / Speed) / Speed;
+        get => topWidth - Smooth / Mathf.Abs(Speed) / Mathf.Abs(Speed);
     }
 
     private float bottomInterval
     {
-        get => (bottomWidth - Smooth / Speed) / Speed;
+        get => bottomWidth - Smooth / Mathf.Abs(Speed) / Mathf.Abs(Speed);
     }
 
     private Vector3 topScale
@@ -47,8 +47,7 @@ public class ObstacleGenerator : MonoBehaviour
 
     void Awake()
     {
-        startPos = new Vector3(15f, 0f, 0f);
-        FillPool();
+        UpdateSpawn();
     }
 
     void Start()
@@ -58,28 +57,15 @@ public class ObstacleGenerator : MonoBehaviour
         // StartCoroutine(generator());
     }
 
-    private void FillPool()
-    {
-        Obstacles = new Queue<GameObject>();
-        for (int i = 0; i < PoolSize; i++)
-        {
-            GameObject clone = Instantiate(Obstacle, startPos, Quaternion.identity, ObstaclesContainer);
-            clone.SetActive(false);
-            Obstacles.Enqueue(clone);
-        }
-    }
-
-    private GameObject GetObstacle()
-    {
-        GameObject clone = Obstacles.Dequeue();
-        clone.transform.position = startPos;
-        updateSpeed();
-        return clone;
-    }
-
-    private void updateSpeed()
+    public void UpdateSpeed()
     {
         Mover.Speed = Speed;
+        UpdateSpawn();
+    }
+
+    private void UpdateSpawn()
+    {
+        float x = Speed >= 0 ? 30f : -30f;
     }
 
     private void updateTopTransform()
@@ -100,7 +86,13 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (true)
         {
-            top = GetObstacle();
+            if (Speed == 0f) //Stops obstacles from generating if Speed = 0.
+            {
+                yield return null;
+                continue;
+            }
+
+            top = Instantiate(Obstacle, startPos, Quaternion.identity, ObstaclesContainer);
             topHeight = Random.Range(HeightRange.x, HeightRange.y);
             updateTopTransform();
             yield return new WaitForSeconds(topInterval);
@@ -114,7 +106,13 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (true)
         {
-            bottom = GetObstacle();
+            if (Speed == 0f) //Stops obstacles from generating if Speed = 0.
+            {
+                yield return null;
+                continue;
+            }
+            
+            bottom = Instantiate(Obstacle, startPos, Quaternion.identity, ObstaclesContainer);
             bottomHeight = Random.Range(HeightRange.x, HeightRange.y);
             updateBottomTransform();
             yield return new WaitForSeconds(bottomInterval);
@@ -168,8 +166,8 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (t < D * T)
         {
-            top = GetObstacle();
-            bottom = GetObstacle();
+            //top = GetObstacle();
+            //bottom = GetObstacle();
 
             if (h)
                 height = Mathf.MoveTowards(height, HeightRange.y, Delta);
@@ -208,8 +206,8 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (t < D * T)
         {
-            top = GetObstacle();
-            bottom = GetObstacle();
+            //top = GetObstacle();
+            //bottom = GetObstacle();
 
             if (h)
             {

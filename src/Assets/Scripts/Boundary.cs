@@ -6,6 +6,8 @@ public class Boundary : MonoBehaviour
 {
     void OnTriggerExit2D(Collider2D other)
     {
+        if (other == null || other.gameObject == null) return;
+
         if (other.CompareTag("Obstacle"))
         {
             other.gameObject.SetActive(false);
