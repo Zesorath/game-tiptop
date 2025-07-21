@@ -27,12 +27,12 @@ public class ObstacleGenerator : MonoBehaviour
 
     private float topInterval
     {
-        get => topWidth - Smooth / Mathf.Abs(Speed) / Mathf.Abs(Speed);
+        get => (topWidth - Smooth / Mathf.Abs(Speed)) / Mathf.Abs(Speed);
     }
 
     private float bottomInterval
     {
-        get => bottomWidth - Smooth / Mathf.Abs(Speed) / Mathf.Abs(Speed);
+        get => (bottomWidth - Smooth / Mathf.Abs(Speed)) / Mathf.Abs(Speed);
     }
 
     private Vector3 topScale
@@ -66,6 +66,7 @@ public class ObstacleGenerator : MonoBehaviour
     private void UpdateSpawn()
     {
         float x = Speed >= 0 ? 30f : -30f;
+        startPos = new Vector3(x, 0f, 0f);
     }
 
     private void updateTopTransform()
@@ -83,6 +84,7 @@ public class ObstacleGenerator : MonoBehaviour
     private IEnumerator topRandGen()
     {
         topWidth = WidthRange.x;
+        float timer = 0f;
 
         while (true)
         {
@@ -92,11 +94,18 @@ public class ObstacleGenerator : MonoBehaviour
                 continue;
             }
 
-            top = Instantiate(Obstacle, startPos, Quaternion.identity, ObstaclesContainer);
-            topHeight = Random.Range(HeightRange.x, HeightRange.y);
-            updateTopTransform();
-            yield return new WaitForSeconds(topInterval);
-            top.SetActive(true);
+            if (timer <= 0f)
+            {
+                top = Instantiate(Obstacle, startPos, Quaternion.identity, ObstaclesContainer);
+                topHeight = Random.Range(HeightRange.x, HeightRange.y);
+                updateTopTransform();
+                //yield return new WaitForSeconds(topInterval);
+                top.SetActive(true);
+                timer = topInterval;
+            }
+
+            timer -= Time.deltaTime;
+            yield return null;
         }
     }
 
