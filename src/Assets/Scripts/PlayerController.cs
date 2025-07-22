@@ -63,7 +63,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void FixedUpdate() //
+    /*void FixedUpdate() // Liams ned FixedUpdate
+    {
+        rb.velocity = new Vector2(0f, rb.velocity.y);
+    }*/
+    void FixedUpdate() //Liams Old Fixed update to test
     {
         rb.velocity = new Vector2(movement, rb.velocity.y);
     }
@@ -93,13 +97,6 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = gravityFlip ? -2.5f : 2.5f;
     }
 
-    //Once player hits boundary the player is moved to the center of the screen
-    /*void Respawn()
-    {
-        transform.position = startPos;
-        Time.timeScale = 0; //Pause game after respawn
-        waitingForInput = true;
-    }*/
 
     void Respawn()
     {
@@ -112,25 +109,6 @@ public class PlayerController : MonoBehaviour
     Vector2 FindSafeSpot(Vector2 center, float radius, float buffer)
     {
         int maxAttempts = 100;
-        //int attempts = 0;
-
-        /*while (attempts < maxAttempts)
-        {
-            //Choose a random point in a circle around the center
-            Vector2 randomOffset = Random.insideUnitCircle * radius;
-            Vector2 candidatePos = center + randomOffset;
-
-            //Check for obstacles
-            Collider2D hit = Physics2D.OverlapCircle(candidatePos, checkRadius, LayerMask.GetMask("Obstacle"));
-            if (hit == null)
-            {
-                //No obstacle detected
-                return candidatePos;
-            }
-
-            attempts++;
-        }
-        */
 
         for(int i = 0; i < maxAttempts; i++)
         {
