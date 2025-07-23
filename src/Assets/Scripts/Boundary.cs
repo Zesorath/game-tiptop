@@ -10,8 +10,7 @@ public class Boundary : MonoBehaviour
 
         if (other.CompareTag("Obstacle"))
         {
-            other.gameObject.SetActive(false);
-            ObstacleGenerator.Obstacles.Enqueue(other.gameObject);
+            Destroy(other.gameObject);
         }
         else
         {

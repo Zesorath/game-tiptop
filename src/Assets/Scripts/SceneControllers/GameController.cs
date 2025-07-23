@@ -25,6 +25,7 @@ public class GameController : MonoBehaviour
     //Lives Variables
     private int lives;
     private const int defaultLives = 3;
+    private float scoreAccumulator = 0f;
 
     public int Score
     {
@@ -81,7 +82,6 @@ public class GameController : MonoBehaviour
     {
         Time.timeScale = 1;
         TapsellStandardBanner.Hide();
-        InvokeRepeating("addScore", 1f, 1f);
     }
 
     void Update()
@@ -90,11 +90,19 @@ public class GameController : MonoBehaviour
         {
             PauseMenuToggle();
         }
-    }
 
-    private void addScore()
-    {
-        Score++;
+        if (!IsGameOver && !IsGamePaused)
+        {
+            float speed = Mathf.Abs(FindObjectOfType<ObstacleGenerator>().Speed);
+            scoreAccumulator += speed * Time.deltaTime;
+
+            if (scoreAccumulator >= 1f)
+            {
+                int points = Mathf.FloorToInt(scoreAccumulator);
+                Score += points;
+                scoreAccumulator -= points;
+            }
+        }
     }
 
     //Update lives for UI
@@ -130,7 +138,6 @@ public class GameController : MonoBehaviour
         IsGameOver = true;
         Time.timeScale = 0;
         TapsellStandardBanner.Show();
-        CancelInvoke("AddScore");
         if (Score > BestScore)
         {
             BestScore = Score;
@@ -150,6 +157,8 @@ public class GameController : MonoBehaviour
 
     public void Restart()
     {
+        FindObjectOfType<ObstacleGenerator>().Speed = 10f;
+        FindObjectOfType<ObstacleGenerator>().UpdateSpeed();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
