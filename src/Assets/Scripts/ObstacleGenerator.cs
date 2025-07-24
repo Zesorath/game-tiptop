@@ -7,6 +7,7 @@ public class ObstacleGenerator : MonoBehaviour
     public static Queue<GameObject> Obstacles;
     public PlayerController PC;
 
+    [Header("Pool & Movement")]
     public int PoolSize;
     public float Speed;
     public float Smooth;
@@ -19,11 +20,17 @@ public class ObstacleGenerator : MonoBehaviour
     public float Force;
     public bool mimicPower = false;
 
+    [Header("Mimic Settings")]
+    public Transform mimic;               // Reference to mimic GameObject
+    public GameObject mimicBlockPrefab;   // Mimic block prefab
+
+    [Header("Speed‐Control Tuning")]
+    public float SpeedStep = 0.5f;
+    public float MinSpeed = 1f;
+    public float MaxSpeed = 10f;
+
     public Rigidbody2D rb;
     public GameController gc;
-
-    public Transform mimic; // Reference to mimic GameObject
-    public GameObject mimicBlockPrefab; // Mimic block prefab
 
     private Vector3 startPos;
     private GameObject top;
@@ -33,16 +40,17 @@ public class ObstacleGenerator : MonoBehaviour
     private float bottomHeight;
     private float bottomWidth;
 
+    private enum SpawnMode { Obstacles, Mimic }
+    private SpawnMode currentMode = SpawnMode.Obstacles;
+
+    public float modeDuration = 3f; // 3 seconds per mode
+
+    // Re‐calculate these whenever Speed or size changes:
     private float topInterval => (topWidth - Smooth / Speed) / Speed;
     private float bottomInterval => (bottomWidth - Smooth / Speed) / Speed;
 
     private Vector3 topScale => new Vector3(topWidth, topHeight, 1);
     private Vector3 bottomScale => new Vector3(bottomWidth, bottomHeight, 1);
-
-    private enum SpawnMode { Obstacles, Mimic }
-    private SpawnMode currentMode = SpawnMode.Obstacles;
-
-    public float modeDuration = 3f; // 3 seconds per mode
 
     void Awake()
     {
@@ -58,13 +66,43 @@ public class ObstacleGenerator : MonoBehaviour
         StartCoroutine(ModeSwitcher());
     }
 
-    private void Update()
+    /// <summary>
+    /// Increase obstacle speed by SpeedStep (clamped at MaxSpeed).
+    /// Call this from your input script on X‑press.
+    /// </summary>
+    public void SpeedUp()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            rb.AddForce(Vector2.up * Force);
-        }
+        Speed = Mathf.Min(Speed + SpeedStep, MaxSpeed);
+        updateSpeed();
+        Debug.Log($"Obstacle Speed → {Speed}");
     }
+
+    /// <summary>
+    /// Decrease obstacle speed by SpeedStep (clamped at MinSpeed).
+    /// Call this from your input script on Z‑press.
+    /// </summary>
+    public void SpeedDown()
+    {
+        Speed = Mathf.Max(Speed - SpeedStep, MinSpeed);
+        updateSpeed();
+        Debug.Log($"Obstacle Speed → {Speed}");
+    }
+
+    /// <summary>
+    /// Applies the new Speed to all movers and recalculates spawn startPos.
+    /// </summary>
+    public void updateSpeed()
+    {
+        Mover.Speed = Speed;
+        //UpdateSpawn();
+    }
+
+    /*private void UpdateSpawn()
+    {
+        // If you later want to flip spawn direction based on sign, this handles it
+        float x = Speed >= 0 ? 30f : -30f;
+        startPos = new Vector3(x, 0f, 0f);
+    }*/
 
     private void FillPool()
     {
@@ -85,21 +123,24 @@ public class ObstacleGenerator : MonoBehaviour
         return clone;
     }
 
-    private void updateSpeed()
-    {
-        Mover.Speed = Speed;
-    }
-
     private void updateTopTransform()
     {
         top.transform.localScale = topScale;
-        top.transform.position = new Vector3(top.transform.position.x, 5 - top.transform.localScale.y / 2, 0f);
+        top.transform.position = new Vector3(
+            top.transform.position.x,
+            5f - top.transform.localScale.y / 2f,
+            0f
+        );
     }
 
     private void updateBottomTransform()
     {
         bottom.transform.localScale = bottomScale;
-        bottom.transform.position = new Vector3(bottom.transform.position.x, -5 + bottom.transform.localScale.y / 2, 0f);
+        bottom.transform.position = new Vector3(
+            bottom.transform.position.x,
+            -5f + bottom.transform.localScale.y / 2f,
+            0f
+        );
     }
 
     private IEnumerator topRandGen()
@@ -108,7 +149,6 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (true)
         {
-            // Wait for Obstacle mode
             yield return new WaitUntil(() => currentMode == SpawnMode.Obstacles);
 
             top = GetObstacle();
@@ -125,7 +165,6 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (true)
         {
-            // Wait for Obstacle mode
             yield return new WaitUntil(() => currentMode == SpawnMode.Obstacles);
 
             bottom = GetObstacle();
@@ -143,14 +182,12 @@ public class ObstacleGenerator : MonoBehaviour
 
         while (true)
         {
-            // Only spawn mimic blocks during Mimic mode
             if (currentMode == SpawnMode.Mimic && mimic != null && mimicBlockPrefab != null)
             {
-                Vector3 startPos = mimic.position;
-
+                Vector3 mStart = mimic.position;
                 for (int i = 0; i < numberOfBlocks; i++)
                 {
-                    Vector3 spawnPos = startPos + new Vector3(i * spacing, 0f, 0f);
+                    Vector3 spawnPos = mStart + new Vector3(i * spacing, 0f, 0f);
                     GameObject block = Instantiate(mimicBlockPrefab, spawnPos, Quaternion.identity, ObstaclesContainer);
                     block.SetActive(true);
                 }
@@ -164,17 +201,15 @@ public class ObstacleGenerator : MonoBehaviour
     {
         while (true)
         {
-            // Set to Obstacles mode
             currentMode = SpawnMode.Obstacles;
             Debug.Log("Mode: Obstacles (Top/Bottom blocks spawning)");
             yield return new WaitForSeconds(modeDuration);
 
-            // Set to Mimic mode
             currentMode = SpawnMode.Mimic;
             Debug.Log("Mode: Mimic blocks spawning");
             yield return new WaitForSeconds(modeDuration);
         }
     }
 
-    // (Keep your other coroutines like gen1(), gen2() if you want, unchanged)
+    // (Keep any other coroutines like gen1(), gen2() unchanged below…)
 }

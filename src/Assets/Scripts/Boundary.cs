@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Boundary : MonoBehaviour
 {
-    void OnTriggerExit2D(Collider2D other)
+    /*void OnTriggerExit2D(Collider2D other)
     {
         if (other == null || other.gameObject == null) return;
 
@@ -12,6 +12,21 @@ public class Boundary : MonoBehaviour
         {
             other.gameObject.SetActive(false);
             ObstacleGenerator.Obstacles.Enqueue(other.gameObject);
+        }
+        else
+        {
+            Destroy(other.gameObject);
+        }
+    }*/
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (other == null || other.gameObject == null) return;
+
+        if (other.CompareTag("Obstacle"))
+        {
+            //other.gameObject.SetActive(false);
+            //ObstacleGenerator.Obstacles.Enqueue(other.gameObject);
+            Destroy(other.gameObject);
         }
         else
         {

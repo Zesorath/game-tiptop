@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     bool gravityFlip = false;
     Vector2 startPos;   //Set respawn position
     bool waitingForInput = false;   //Bool for waiting after death
+    public ObstacleGenerator obstacleMods;
 
     private Rigidbody2D rb;
     private GameController gc;
@@ -32,6 +33,21 @@ public class PlayerController : MonoBehaviour
                 Time.timeScale = 1; //Unpause game
                 Flap();
             }
+            if (Input.GetKeyDown(KeyCode.LeftShift)) //Flip gravity by pressing the "Shift" key
+            {
+                Flip();
+            }
+            if (Input.GetKeyDown(KeyCode.Z)) //Makes the player move left if they press "Z"
+            {
+                obstacleMods.Speed -= 2.5f;
+                obstacleMods.updateSpeed();
+            }
+
+            if (Input.GetKeyDown(KeyCode.X)) //Makes the player move right if they press "X"
+            {
+                obstacleMods.Speed += 2.5f;
+                obstacleMods.updateSpeed();
+            }
         }
         else
         {
@@ -39,7 +55,28 @@ public class PlayerController : MonoBehaviour
             {
                 Flap();
             }
+            if (Input.GetKeyDown(KeyCode.LeftShift)) //Flip gravity by pressing the "Shift" key
+            {
+                Flip();
+            }
+            if (Input.GetKeyDown(KeyCode.Z)) //Makes the player move left if they press "Z"
+            {
+                obstacleMods.Speed -= 2.5f;
+                obstacleMods.updateSpeed();
+            }
+
+            if (Input.GetKeyDown(KeyCode.X)) //Makes the player move right if they press "X"
+            {
+                obstacleMods.Speed += 2.5f;
+                obstacleMods.updateSpeed();
+            }
         }
+
+    }
+
+    public void FixedUpdate()
+    {
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -60,7 +97,23 @@ public class PlayerController : MonoBehaviour
         //rb.linearVelocity = Vector2.up * Force; //Should be more responsive than before
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, Force * direction);    //New formula to add direction
     }
+    /*public void Flap()
+    {
+        float direction = gravityFlip ? -1f : 1f;
+        rb.AddForce(Vector2.up * Force * direction);
+    }*/
 
+    public void Flip()
+    {
+
+        gravityFlip = !gravityFlip;
+        rb.gravityScale = rb.gravityScale * -1;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, -rb.linearVelocity.y);
+        
+        Vector3 s = transform.localScale;
+        s.y *= -1f;
+        transform.localScale = s;
+    }
     //Once player hits boundary the player is moved to the center of the screen
     /*void Respawn()
     {
